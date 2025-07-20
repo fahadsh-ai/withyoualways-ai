@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WithYouAlways.ai</title>
+  <style>
+    body {
+      background: #f5f5f5;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    h1 {
+      color: #444;
+    }
+    #chat {
+      width: 100%;
+      max-width: 600px;
+      height: 400px;
+      background: white;
+      border-radius: 10px;
+      padding: 1rem;
+      overflow-y: auto;
+      margin-bottom: 1rem;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    #inputArea {
+      display: flex;
+      width: 100%;
+      max-width: 600px;
+    }
+    #input {
+      flex: 1;
+      padding: 1rem;
+      font-size: 1rem;
+    }
+    button {
+      padding: 1rem;
+      background: #444;
+      color: white;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>WithYouAlways.ai</h1>
+  <div id="chat"></div>
+  <div id="inputArea">
+    <input type="text" id="input" placeholder="Type something…" />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <script>
+    const chat = document.getElementById('chat');
+    const input = document.getElementById('input');
+
+    function sendMessage() {
+      const message = input.value;
+      if (!message) return;
+      const userBubble = document.createElement('div');
+      userBubble.textContent = "You: " + message;
+      chat.appendChild(userBubble);
+      input.value = "";
+
+      fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message })
+      })
+      .then(res => res.json())
+      .then(data => {
+        const aiBubble = document.createElement('div');
+        aiBubble.textContent = "AI: " + data.reply;
+        chat.appendChild(aiBubble);
+      });
+    }
+  </script>
+</body>
+</html>
