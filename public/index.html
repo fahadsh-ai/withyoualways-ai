@@ -3,79 +3,49 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>WithYouAlways.ai</title>
+  <title>With You Always</title>
   <style>
-    body {
-      background: #f5f5f5;
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem;
-    }
-    h1 {
-      color: #444;
-    }
-    #chat {
-      width: 100%;
-      max-width: 600px;
-      height: 400px;
-      background: white;
-      border-radius: 10px;
-      padding: 1rem;
-      overflow-y: auto;
-      margin-bottom: 1rem;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    #inputArea {
-      display: flex;
-      width: 100%;
-      max-width: 600px;
-    }
-    #input {
-      flex: 1;
-      padding: 1rem;
-      font-size: 1rem;
-    }
-    button {
-      padding: 1rem;
-      background: #444;
-      color: white;
-      border: none;
-    }
+    body { font-family: sans-serif; padding: 2rem; background: #f4f4f4; }
+    h1 { color: #444; }
+    #chat { max-width: 600px; margin: auto; }
+    .bubble { padding: 1rem; margin: 1rem 0; border-radius: 10px; }
+    .user { background: #d9edf7; text-align: right; }
+    .ai { background: #f5f5f5; }
+    input, button { padding: 0.75rem; font-size: 1rem; width: 100%; margin-top: 1rem; }
   </style>
 </head>
 <body>
-  <h1>WithYouAlways.ai</h1>
-  <div id="chat"></div>
-  <div id="inputArea">
-    <input type="text" id="input" placeholder="Type something…" />
+  <div id="chat">
+    <h1>With You Always</h1>
+    <div id="messages"></div>
+    <input id="userInput" placeholder="Type how you’re feeling..." />
     <button onclick="sendMessage()">Send</button>
   </div>
 
   <script>
-    const chat = document.getElementById('chat');
-    const input = document.getElementById('input');
-
-    function sendMessage() {
+    async function sendMessage() {
+      const input = document.getElementById('userInput');
       const message = input.value;
       if (!message) return;
-      const userBubble = document.createElement('div');
-      userBubble.textContent = "You: " + message;
-      chat.appendChild(userBubble);
-      input.value = "";
 
-      fetch('/chat', {
+      addMessage(message, 'user');
+      input.value = '';
+
+      const res = await fetch('/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message })
-      })
-      .then(res => res.json())
-      .then(data => {
-        const aiBubble = document.createElement('div');
-        aiBubble.textContent = "AI: " + data.reply;
-        chat.appendChild(aiBubble);
+        body: JSON.stringify({ message }),
       });
+
+      const data = await res.json();
+      addMessage(data.reply, 'ai');
+    }
+
+    function addMessage(text, sender) {
+      const div = document.createElement('div');
+      div.className = `bubble ${sender}`;
+      div.textContent = text;
+      document.getElementById('messages').appendChild(div);
     }
   </script>
 </body>
