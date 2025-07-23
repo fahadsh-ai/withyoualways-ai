@@ -1,24 +1,43 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const path = require('path');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const { OpenAI } = require('openai');
+
+dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 10000;
 
-// Serve frontend
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(bodyParser.json());
+app.use(cors());
+app.use(express.json());
+app.use(express.static('public'));
 
-// Chat endpoint
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
 app.post('/chat', async (req, res) => {
-  const userMessage = req.body.message;
+  const message = req.body.message;
 
-  // TODO: Replace with real AI response later
-  const response = `I'm here with you. You said: "${userMessage}"`;
+  try {
+    const chatCompletion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "You are a gentle, understanding grief counselor helping someone who has lost a loved one. Listen well, speak kindly, and help them express themselves without offering false hope."
+        },
+        {
+          role: "user",
+          content: message
+        }
+      ],
+    });
 
-  res.json({ reply: response });
+    res.json({ reply: chatCompletion.choices[0].message.content });
+  } catch (err) {
+    console.error('Error:', err);
+    res.status(500).json({ reply: "I'm here, but something went wrong. Please try again later." });
+  }
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
