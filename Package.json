@@ -1,11 +1,15 @@
 {
   "name": "withyoualways-ai",
   "version": "1.0.0",
+  "description": "Grief support AI for widows and widowers",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "openai": "^4.0.0",
+    "dotenv": "^16.0.3",
+    "cors": "^2.8.5"
   }
 }
