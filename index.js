@@ -1,35 +1,42 @@
-const express = require("express");
-const cors = require("cors");
-const { OpenAI } = require("openai");
+import express from 'express';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import OpenAI from 'openai';
+
+dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 10000;
 
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
 app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json());
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+app.get('/', (req, res) => {
+  res.send('Welcome to WithYouAlways.ai – Your grief companion is listening.');
 });
 
-app.get("/", (req, res) => {
-  res.send("Welcome to WithYouAlways.ai – Your grief companion is listening.");
-});
-
-app.post("/chat", async (req, res) => {
+app.post('/chat', async (req, res) => {
   const { message } = req.body;
+
+  if (!message) {
+    return res.status(400).send({ error: 'Message is required' });
+  }
 
   try {
     const chatCompletion = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [{ role: "user", content: message }]
+      messages: [{ role: 'user', content: message }],
+      model: 'gpt-4',
     });
 
-    const reply = chatCompletion.choices[0].message.content;
-    res.json({ reply });
+    res.send({
+      reply: chatCompletion.choices[0].message.content.trim()
+    });
   } catch (err) {
-    console.error("Error with OpenAI API:", err);
-    res.status(500).json({ error: "Something went wrong." });
+    console.error(err);
+    res.status(500).send({ error: 'Failed to generate response' });
   }
 });
 
