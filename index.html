@@ -1,44 +1,79 @@
-const express = require("express");
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const path = require("path");
-require("dotenv").config();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WithYouAlways.ai</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      color: #444;
+    }
+    textarea {
+      width: 100%;
+      max-width: 600px;
+      height: 150px;
+      margin-top: 1rem;
+      padding: 1rem;
+      font-size: 1rem;
+    }
+    button {
+      padding: 0.75rem 2rem;
+      margin-top: 1rem;
+      font-size: 1rem;
+      background-color: #444;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .response {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: white;
+      border-radius: 4px;
+      max-width: 600px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>WithYouAlways.ai</h1>
+  <p>Your grief companion is listening...</p>
 
-const { OpenAI } = require("openai");
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  <textarea id="userInput" placeholder="Tell me what you're feeling..."></textarea>
+  <button onclick="sendMessage()">Send</button>
 
-const app = express();
-const port = process.env.PORT || 10000;
+  <div class="response" id="responseBox"></div>
 
-app.use(cors());
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, "public")));
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById('userInput').value;
+      const responseBox = document.getElementById('responseBox');
+      responseBox.innerText = 'Thinking...';
 
-app.post("/chat", async (req, res) => {
-  const { message } = req.body;
-  try {
-    const chatCompletion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: "You are a grief counselor named Ava. Be kind, warm, and supportive.",
-        },
-        {
-          role: "user",
-          content: message,
-        },
-      ],
-    });
+      try {
+        const res = await fetch('/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ message: input })
+        });
 
-    const reply = chatCompletion.choices[0].message.content;
-    res.json({ reply });
-  } catch (error) {
-    console.error("Error with OpenAI:", error);
-    res.status(500).json({ reply: "I'm having trouble responding right now. Please try again later." });
-  }
-});
-
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+        const data = await res.json();
+        responseBox.innerText = data.reply || 'No response.';
+      } catch (err) {
+        responseBox.innerText = 'Error: ' + err.message;
+      }
+    }
+  </script>
+</body>
+</html>
