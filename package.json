@@ -1,7 +1,7 @@
 {
   "name": "withyoualways-ai",
   "version": "1.0.0",
-  "description": "Grief companion chatbot",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
